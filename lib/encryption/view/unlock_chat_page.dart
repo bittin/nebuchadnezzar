@@ -77,14 +77,16 @@ class _UnlockChatPageState extends State<UnlockChatPage>
 
     final recoveryKeyInputLoading = recoveryKeyResults.isRunning;
 
-    final recoveryKeyInputError =
-        recoveryKeyResults.hasError && !recoveryKeyInputLoading
-        ? recoveryKeyResults.error?.toString()
-        : null;
-
-    final isRestoringCryptoIdentity = watchValue(
-      (EncryptionManager m) => m.restoreCryptoIdentityCommand.isRunning,
+    final restoreCryptoIdentityResults = watchValue(
+      (EncryptionManager m) => m.restoreCryptoIdentityCommand.results,
     );
+
+    final isRestoringCryptoIdentity = restoreCryptoIdentityResults.isRunning;
+    final restoreCryptoIdentityError = isRestoringCryptoIdentity
+        ? null
+        : restoreCryptoIdentityResults.hasError
+        ? restoreCryptoIdentityResults.error?.toString()
+        : null;
 
     return Scaffold(
       appBar: const YaruWindowTitleBar(
@@ -131,7 +133,7 @@ class _UnlockChatPageState extends State<UnlockChatPage>
                             prefixIcon: const Icon(YaruIcons.key),
                             labelText: l10n.recoveryKey,
                             hintText: 'Es** **** **** ****',
-                            errorText: recoveryKeyInputError != null
+                            errorText: restoreCryptoIdentityError != null
                                 ? l10n.wrongRecoveryKey
                                 : null,
                             errorMaxLines: 2,
