@@ -2595,6 +2595,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get creatingRoomPleaseWait => '创建房间，正在等待...';
 
   @override
+  String waitingRetryMsBeforeCreateRoom(Object retryS) {
+    return 'You are creating too many rooms! The server wants you to wait $retryS seconds before retrying to create room. Or you could cancel the room creation.';
+  }
+
+  @override
   String get creatingSpacePleaseWait => '创建空间，正在等待...';
 
   @override

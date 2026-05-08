@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_it/flutter_it.dart';
+import 'package:matrix/encryption/ssss.dart';
 import 'package:yaru/yaru.dart';
 
 import '../../chat_master/view/chat_master_detail_page.dart';
@@ -85,8 +86,10 @@ class _UnlockChatPageState extends State<UnlockChatPage>
     final restoreCryptoIdentityError = isRestoringCryptoIdentity
         ? null
         : restoreCryptoIdentityResults.hasError
-        ? restoreCryptoIdentityResults.error?.toString()
+        ? restoreCryptoIdentityResults.error
         : null;
+
+    final isLoading = recoveryKeyInputLoading || isRestoringCryptoIdentity;
 
     return Scaffold(
       appBar: const YaruWindowTitleBar(
@@ -94,101 +97,99 @@ class _UnlockChatPageState extends State<UnlockChatPage>
         backgroundColor: Colors.transparent,
       ),
       body: Center(
-        child: isRestoringCryptoIdentity
-            ? const Progress()
-            : SizedBox(
-                width: 400,
-                child: ListView(
-                  shrinkWrap: true,
-                  children: space(
-                    heightGap: kBigPadding,
-                    children: [
-                      if (cryptoIdentityInitialized) ...[
-                        ListTile(
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 8.0,
-                          ),
-                          trailing: Icon(
-                            YaruIcons.information,
-                            color: context.colorScheme.primary,
-                          ),
-                          subtitle: Text(
-                            l10n.pleaseEnterRecoveryKeyDescription,
-                          ),
-                        ),
-                        TextField(
-                          onChanged: (_) => di<EncryptionManager>()
-                              .loadRecoveryKeyFromSecureStorageCommand
-                              .clearErrors(),
-                          controller: _recoveryKeyTextEditingController,
-                          minLines: 1,
-                          maxLines: 2,
-                          autocorrect: false,
-                          readOnly: recoveryKeyInputLoading,
-                          autofillHints: recoveryKeyInputLoading
-                              ? null
-                              : [AutofillHints.password],
-                          style: const TextStyle(fontFamily: 'UbuntuMono'),
-                          decoration: InputDecoration(
-                            prefixIcon: const Icon(YaruIcons.key),
-                            labelText: l10n.recoveryKey,
-                            hintText: 'Es** **** **** ****',
-                            errorText: restoreCryptoIdentityError != null
+        child: SizedBox(
+          width: 400,
+          child: ListView(
+            shrinkWrap: true,
+            children: space(
+              heightGap: kBigPadding,
+              children: [
+                if (cryptoIdentityInitialized) ...[
+                  ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    trailing: Icon(
+                      YaruIcons.information,
+                      color: context.colorScheme.primary,
+                    ),
+                    subtitle: Text(l10n.pleaseEnterRecoveryKeyDescription),
+                  ),
+                  TextField(
+                    onChanged: (_) => di<EncryptionManager>()
+                        .loadRecoveryKeyFromSecureStorageCommand
+                        .clearErrors(),
+                    controller: _recoveryKeyTextEditingController,
+                    minLines: 1,
+                    maxLines: 2,
+                    autocorrect: false,
+                    readOnly: isLoading,
+                    autofillHints: isLoading ? null : [AutofillHints.password],
+                    style: const TextStyle(fontFamily: 'UbuntuMono'),
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(YaruIcons.key),
+                      labelText: l10n.recoveryKey,
+                      hintText: 'Es** **** **** ****',
+                      errorText: restoreCryptoIdentityError != null
+                          ? restoreCryptoIdentityError
+                                    is InvalidPassphraseException
                                 ? l10n.wrongRecoveryKey
-                                : null,
-                            errorMaxLines: 2,
-                          ),
-                        ),
-                        ListenableBuilder(
-                          listenable: _recoveryKeyTextEditingController,
-                          builder: (context, child) => ElevatedButton.icon(
-                            icon: recoveryKeyInputLoading
-                                ? const Progress()
-                                : const Icon(Icons.lock_open_outlined),
-                            label: Text(l10n.unlockOldMessages),
-                            onPressed:
-                                recoveryKeyInputLoading ||
-                                    _recoveryKeyTextEditingController
-                                        .text
-                                        .isEmpty
-                                ? null
-                                : () => di<EncryptionManager>()
-                                      .restoreCryptoIdentityCommand
-                                      .run((
-                                        keyIdentifier: null,
-                                        keyOrPassphrase:
-                                            _recoveryKeyTextEditingController
-                                                .text
-                                                .trim(),
-                                        selfSign: true,
-                                      )),
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            const Expanded(child: Divider()),
-                            Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: Text(l10n.or),
-                            ),
-                            const Expanded(child: Divider()),
-                          ],
-                        ),
-                        UnlockFromOtherDevicesButton(
-                          recoveryKeyInputLoading: recoveryKeyInputLoading,
-                        ),
-                      ],
-                      InitCryptoIdentityButton(
-                        label: cryptoIdentityInitialized
-                            ? null
-                            : l10n.createRecoveryKey,
-                        loading: recoveryKeyInputLoading,
+                                : restoreCryptoIdentityError.toString()
+                          : null,
+                      errorMaxLines: 2,
+                    ),
+                  ),
+                  ListenableBuilder(
+                    listenable: _recoveryKeyTextEditingController,
+                    builder: (context, child) => ElevatedButton.icon(
+                      icon: isLoading
+                          ? SizedBox.square(
+                              dimension: 18,
+                              child: Progress(
+                                strokeWidth: 2,
+                                color: context.colorScheme.onSurface,
+                              ),
+                            )
+                          : const Icon(Icons.lock_open_outlined),
+                      label: Text(l10n.unlockOldMessages),
+                      onPressed:
+                          isLoading ||
+                              _recoveryKeyTextEditingController.text.isEmpty
+                          ? null
+                          : () => di<EncryptionManager>()
+                                .restoreCryptoIdentityCommand
+                                .run((
+                                  keyIdentifier: null,
+                                  keyOrPassphrase:
+                                      _recoveryKeyTextEditingController.text
+                                          .trim(),
+                                  selfSign: true,
+                                )),
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      const Expanded(child: Divider()),
+                      Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Text(l10n.or),
                       ),
-                      const ChatSettingsLogoutButton(),
+                      const Expanded(child: Divider()),
                     ],
                   ),
+                  UnlockFromOtherDevicesButton(
+                    recoveryKeyInputLoading: isLoading,
+                  ),
+                ],
+                InitCryptoIdentityButton(
+                  label: cryptoIdentityInitialized
+                      ? null
+                      : l10n.createRecoveryKey,
+                  loading: isLoading,
                 ),
-              ),
+                ChatSettingsLogoutButton(disabled: isLoading),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart' hide Visibility;
-import 'package:matrix/matrix.dart';
 import 'package:flutter_it/flutter_it.dart';
+import 'package:matrix/matrix.dart';
 import 'package:yaru/yaru.dart';
 
 import '../../../common/chat_manager.dart';
@@ -33,6 +33,8 @@ class CreateOrEditRoomDialog extends StatefulWidget
 }
 
 class _CreateOrEditRoomDialogState extends State<CreateOrEditRoomDialog> {
+  late final _cancelNode = FocusNode();
+
   @override
   void initState() {
     super.initState();
@@ -74,6 +76,16 @@ class _CreateOrEditRoomDialogState extends State<CreateOrEditRoomDialog> {
 
     final isSpace = widget.room?.isSpace ?? widget.space;
 
+    final retryAfterMs = watchValue((CreateRoomManager m) => m.retryAfterMs);
+    registerHandler(
+      select: (CreateRoomManager m) => m.retryAfterMs,
+      handler: (context, retryAfterMs, cancel) {
+        if (retryAfterMs != null) {
+          _cancelNode.requestFocus();
+        }
+      },
+    );
+
     return AlertDialog(
       titlePadding: EdgeInsets.zero,
       actionsAlignment: MainAxisAlignment.start,
@@ -94,17 +106,33 @@ class _CreateOrEditRoomDialogState extends State<CreateOrEditRoomDialog> {
           ),
           child: isCreating
               ? Center(
-                  child: Column(
-                    spacing: kBigPadding,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        isSpace
-                            ? l10n.creatingSpacePleaseWait
-                            : l10n.creatingRoomPleaseWait,
-                      ),
-                      const Progress(),
-                    ],
+                  child: SizedBox(
+                    width: 400,
+                    child: Column(
+                      spacing: kBigPadding,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (retryAfterMs != null)
+                          Padding(
+                            padding: const EdgeInsets.all(kMediumPadding),
+                            child: Text(
+                              l10n.waitingRetryMsBeforeCreateRoom(
+                                (retryAfterMs ~/ 1000).toString(),
+                              ),
+                            ),
+                          )
+                        else
+                          Padding(
+                            padding: const EdgeInsets.all(kMediumPadding),
+                            child: Text(
+                              isSpace
+                                  ? l10n.creatingSpacePleaseWait
+                                  : l10n.creatingRoomPleaseWait,
+                            ),
+                          ),
+                        const Progress(),
+                      ],
+                    ),
                   ),
                 )
               : roomCreationErrors?.error != null
@@ -212,7 +240,16 @@ class _CreateOrEditRoomDialogState extends State<CreateOrEditRoomDialog> {
                   widthGap: kMediumPadding,
                   children: [
                     OutlinedButton(
-                      onPressed: Navigator.of(context).pop,
+                      style: retryAfterMs != null
+                          ? OutlinedButton.styleFrom(
+                              foregroundColor: context.colorScheme.primary,
+                            )
+                          : null,
+                      focusNode: _cancelNode,
+                      onPressed: () {
+                        di<CreateRoomManager>().cancelCreateRoom(true);
+                        Navigator.of(context).pop();
+                      },
                       child: Text(l10n.cancel),
                     ),
                     CreateRoomButton(shallBeSpace: isSpace),

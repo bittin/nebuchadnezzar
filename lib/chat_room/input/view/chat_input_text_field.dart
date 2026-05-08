@@ -90,6 +90,7 @@ class ChatInputTextField extends StatelessWidget with WatchItMixin {
     return Padding(
       padding: const EdgeInsets.all(kMediumPadding),
       child: TextField(
+        autocorrect: true,
         minLines: 1,
         maxLines: 10,
         focusNode: sendNode,

@@ -33,7 +33,7 @@ class _ChatInputState extends State<ChatInput> {
     text: di<DraftManager>().getTextDraft(widget.room.id),
   );
 
-  late final focusNode = FocusNode(
+  late final _focusNode = FocusNode(
     onKeyEvent: (node, event) {
       final enterPressedWithoutShift =
           event is KeyDownEvent &&
@@ -94,14 +94,7 @@ class _ChatInputState extends State<ChatInput> {
   }
 
   void send() {
-    if (di<DraftManager>().getFilesDraft(widget.room.id).isNotEmpty) {
-      di<DraftManager>().sendCommand.runAsync(widget.room).then((_) {
-        _sendController.clear();
-      });
-    } else {
-      _sendController.clear();
-      di<DraftManager>().sendCommand.run(widget.room);
-    }
+    di<DraftManager>().sendCommand.run(widget.room);
   }
 
   @override
@@ -122,7 +115,7 @@ class _ChatInputState extends State<ChatInput> {
                 optionsViewOpenDirection: OptionsViewOpenDirection.up,
                 optionsBuilder: _getSuggestions,
                 textEditingController: _sendController,
-                focusNode: focusNode,
+                focusNode: _focusNode,
                 displayStringForOption: _insertSuggestion,
                 optionsViewBuilder: (c, onSelected, s) {
                   final suggestions = s.toList();

@@ -99,6 +99,7 @@
     "reportIssue",
     "closeApp",
     "creatingRoomPleaseWait",
+    "waitingRetryMsBeforeCreateRoom",
     "creatingSpacePleaseWait",
     "joiningRoomPleaseWait",
     "leavingRoomPleaseWait",
@@ -134,6 +135,7 @@
 
   "zh": [
     "initializingCryptoIdentityPleaseWait",
+    "waitingRetryMsBeforeCreateRoom",
     "wipeSecureStorage",
     "wipeKeyBackup",
     "wipeCrossSigning",
@@ -154,6 +156,7 @@
 
   "zh_Hans": [
     "initializingCryptoIdentityPleaseWait",
+    "waitingRetryMsBeforeCreateRoom",
     "wipeSecureStorage",
     "wipeKeyBackup",
     "wipeCrossSigning",
@@ -174,6 +177,7 @@
 
   "zh_Hant_TW": [
     "initializingCryptoIdentityPleaseWait",
+    "waitingRetryMsBeforeCreateRoom",
     "wipeSecureStorage",
     "wipeKeyBackup",
     "wipeCrossSigning",

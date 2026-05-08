@@ -3270,6 +3270,13 @@
   "reportIssue": "Problem melden",
   "closeApp": "App schließen",
   "creatingRoomPleaseWait": "Raum wird erstellt, bitte warten...",
+  "waitingRetryMsBeforeCreateRoom": "Du erstellst zu viele Räume! Der Server will dass du {retryS} Sekunden wartest, bevor du den Raum erstellst. Oder brich die Raummerstellung ab.",
+  "@waitingRetryMsBeforeCreateRoom": {
+    "type": "text",
+    "placeholders": {
+      "retryS": {}
+    }
+  },
   "creatingSpacePleaseWait": "Bereich wird erstellt, bitte warten...",
   "joiningRoomPleaseWait": "Raum wird betreten, bitte warten...",
   "leavingRoomPleaseWait": "Raum wird verlassen, bitte warten...",

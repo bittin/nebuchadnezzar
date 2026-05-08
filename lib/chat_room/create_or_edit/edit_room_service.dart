@@ -16,7 +16,6 @@ class EditRoomService {
 
   final Client _client;
   List<ArchivedRoom> get archivedRooms => _client.archivedRooms;
-  Future<void> getOneShotSync() => _client.oneShotSync();
 
   Stream<SyncUpdate> get _joinedUpdateStream =>
       _client.onSync.stream.where((e) => e.rooms?.join?.isNotEmpty ?? false);
@@ -358,15 +357,33 @@ class EditRoomService {
 
   // JOIN, LEAVE OR KNOCK ROOM
 
+  int? _retryJoinAfterMs;
+  bool _isJoiningCanceled = false;
+  void cancelJoin(bool value) {
+    _isJoiningCanceled = value;
+    _retryJoinAfterMs = null;
+  }
+
   Future<Room> joinRoom(Room room) async {
     if (room.membership != Membership.join) {
       try {
+        if (_isJoiningCanceled) {
+          cancelJoin(false);
+          throw Exception('Join canceled');
+        }
+        if (_retryJoinAfterMs != null) {
+          await Future.delayed(Duration(milliseconds: _retryJoinAfterMs!));
+          _retryJoinAfterMs = null;
+        }
         await room.join();
         if (room.isDirectChat && !room.encrypted) {
           await room.enableEncryption();
           printMessageInDebugMode('Room encrypted: ${room.encrypted}');
         }
       } on Exception catch (e, s) {
+        if (e is MatrixException && e.error == MatrixError.M_LIMIT_EXCEEDED) {
+          _retryJoinAfterMs = e.retryAfterMs;
+        }
         printMessageInDebugMode(e, s);
         rethrow;
       }
@@ -375,10 +392,29 @@ class EditRoomService {
     return room;
   }
 
+  int? _retryLeaveAfterMs;
+  bool _isLeavingCanceled = false;
+  void cancelLeave(bool value) {
+    _isLeavingCanceled = value;
+    _retryLeaveAfterMs = null;
+  }
+
   Future<void> leaveRoom(Room room) async {
     try {
+      if (_isLeavingCanceled) {
+        cancelLeave(false);
+        throw Exception('Leave canceled');
+      }
+      if (_retryLeaveAfterMs != null) {
+        await Future.delayed(Duration(milliseconds: _retryLeaveAfterMs!));
+        _retryLeaveAfterMs = null;
+      }
       await room.leave();
     } on Exception catch (e, s) {
+      if (e is MatrixException && e.error == MatrixError.M_LIMIT_EXCEEDED) {
+        _retryLeaveAfterMs = e.retryAfterMs;
+        return leaveRoom(room);
+      }
       printMessageInDebugMode(e, s);
       rethrow;
     }
@@ -395,13 +431,31 @@ class EditRoomService {
     }
   }
 
-  Future<void> forgetRoom(Room room, {bool sync = true}) async {
+  Future<void> oneShotSync() => _client.oneShotSync();
+
+  int? _retryForgetAfterMs;
+  bool _isForgettingCanceled = false;
+  void cancelForget(bool value) {
+    _isForgettingCanceled = value;
+    _retryForgetAfterMs = null;
+  }
+
+  Future<void> forgetRoom(Room room) async {
     try {
-      await room.forget();
-      if (sync) {
-        await _client.oneShotSync();
+      if (_isForgettingCanceled) {
+        cancelForget(false);
+        throw Exception('Forget canceled');
       }
+      if (_retryForgetAfterMs != null) {
+        await Future.delayed(Duration(milliseconds: _retryForgetAfterMs!));
+        _retryForgetAfterMs = null;
+      }
+      await room.forget();
     } on Exception catch (e, s) {
+      if (e is MatrixException && e.error == MatrixError.M_LIMIT_EXCEEDED) {
+        _retryForgetAfterMs = e.retryAfterMs;
+        return forgetRoom(room);
+      }
       printMessageInDebugMode(e, s);
       rethrow;
     }

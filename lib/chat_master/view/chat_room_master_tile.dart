@@ -36,7 +36,11 @@ class ChatRoomMasterTile extends StatelessWidget with WatchItMixin {
       (EditRoomManager m) => m.getForgetRoomCommand(room).isRunning,
     );
 
-    final isProcessing = isLeaving || isForgetting;
+    final syncing = watchValue(
+      (EditRoomManager m) => m.oneShotSyncCommand.isRunning,
+    );
+
+    final isProcessing = isLeaving || isForgetting || syncing;
 
     return ChatMasterTileMenu(
       room: room,

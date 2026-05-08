@@ -22,11 +22,16 @@ class InitCryptoIdentityButton extends StatelessWidget {
     final theme = context.theme;
     final l10n = context.l10n;
     return ElevatedButton.icon(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: theme.colorScheme.error,
-        foregroundColor: theme.colorScheme.onError,
+      style: loading
+          ? null
+          : ElevatedButton.styleFrom(
+              backgroundColor: theme.colorScheme.error,
+              foregroundColor: theme.colorScheme.onError,
+            ),
+      icon: Icon(
+        YaruIcons.trash,
+        color: loading ? null : theme.colorScheme.onError,
       ),
-      icon: Icon(YaruIcons.trash, color: theme.colorScheme.onError),
       label: Text(label ?? l10n.recoveryKeyLost),
       onPressed: loading
           ? null

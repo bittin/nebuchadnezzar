@@ -3270,6 +3270,13 @@
   "reportIssue": "Report issue",
   "closeApp": "Close app",
   "creatingRoomPleaseWait": "Creating room, please wait...",
+  "waitingRetryMsBeforeCreateRoom": "You are creating too many rooms! The server wants you to wait {retryS} seconds before retrying to create room. Or you could cancel the room creation.",
+  "@waitingRetryMsBeforeCreateRoom": {
+    "type": "text",
+    "placeholders": {
+      "retryS": {}
+    }
+  },
   "creatingSpacePleaseWait": "Creating space, please wait...",
   "joiningRoomPleaseWait": "Joining room, please wait...",
   "leavingRoomPleaseWait": "Leaving room, please wait...",

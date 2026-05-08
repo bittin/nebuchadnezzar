@@ -2718,6 +2718,11 @@ class AppLocalizationsDe extends AppLocalizations {
   String get creatingRoomPleaseWait => 'Raum wird erstellt, bitte warten...';
 
   @override
+  String waitingRetryMsBeforeCreateRoom(Object retryS) {
+    return 'Du erstellst zu viele Räume! Der Server will dass du $retryS Sekunden wartest, bevor du den Raum erstellst. Oder brich die Raummerstellung ab.';
+  }
+
+  @override
   String get creatingSpacePleaseWait =>
       'Bereich wird erstellt, bitte warten...';
 

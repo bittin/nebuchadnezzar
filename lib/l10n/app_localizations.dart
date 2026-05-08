@@ -4728,6 +4728,12 @@ abstract class AppLocalizations {
   /// **'Creating room, please wait...'**
   String get creatingRoomPleaseWait;
 
+  /// No description provided for @waitingRetryMsBeforeCreateRoom.
+  ///
+  /// In en, this message translates to:
+  /// **'You are creating too many rooms! The server wants you to wait {retryS} seconds before retrying to create room. Or you could cancel the room creation.'**
+  String waitingRetryMsBeforeCreateRoom(Object retryS);
+
   /// No description provided for @creatingSpacePleaseWait.
   ///
   /// In en, this message translates to:

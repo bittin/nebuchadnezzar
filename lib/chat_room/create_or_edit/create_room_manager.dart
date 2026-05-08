@@ -101,12 +101,32 @@ class CreateRoomManager {
     }
   }
 
-  late final Command<bool, Room?> createRoomOrSpaceCommand =
-      Command.createAsync(createRoomOrSpace, initialValue: null);
+  late Command<bool, Room?> createRoomOrSpaceCommand = Command.createAsync(
+    createRoomOrSpace,
+    initialValue: null,
+  );
+
+  final SafeValueNotifier<int?> retryAfterMs = SafeValueNotifier(null);
+  void cancelCreateRoom(bool value) {
+    createRoomOrSpaceCommand.dispose();
+    createRoomOrSpaceCommand = Command.createAsync(
+      createRoomOrSpace,
+      initialValue: null,
+    );
+    retryAfterMs.value = null;
+  }
 
   Future<Room?> createRoomOrSpace(bool shallBeSpace) async {
     String? roomId;
     try {
+      if (retryAfterMs.value != null) {
+        printMessageInDebugMode(
+          'Waiting ${retryAfterMs.value} ms before retrying create room',
+        );
+        await Future.delayed(Duration(milliseconds: retryAfterMs.value!));
+        retryAfterMs.value = null;
+      }
+
       roomId = shallBeSpace
           ? await _client.createSpace(
               name: draft.value.name,
@@ -131,6 +151,10 @@ class CreateRoomManager {
               groupCall: draft.value.groupCall,
             );
     } catch (e, s) {
+      if (e is MatrixException && e.error == MatrixError.M_LIMIT_EXCEEDED) {
+        retryAfterMs.value = e.retryAfterMs;
+        return createRoomOrSpace(shallBeSpace);
+      }
       printMessageInDebugMode(e, s);
       rethrow;
     }

@@ -2685,6 +2685,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get creatingRoomPleaseWait => 'Creating room, please wait...';
 
   @override
+  String waitingRetryMsBeforeCreateRoom(Object retryS) {
+    return 'You are creating too many rooms! The server wants you to wait $retryS seconds before retrying to create room. Or you could cancel the room creation.';
+  }
+
+  @override
   String get creatingSpacePleaseWait => 'Creating space, please wait...';
 
   @override
