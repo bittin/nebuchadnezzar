@@ -26,7 +26,7 @@ class ChatMasterDetailPage extends StatelessWidget
   Widget build(BuildContext context) {
     registerGlobalChatHandlers();
 
-    registerGlobalLeaveForgetCommands();
+    registerGlobalLeaveOrForgetCommand();
 
     registerHandler(
       select: (DraftManager m) => m.sendCommand.errors,

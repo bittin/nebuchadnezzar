@@ -38,8 +38,10 @@ class _ChatMasterTileMenuState extends State<ChatMasterTileMenu> {
         _controller.isOpen ? _controller.close() : _controller.open();
     return GestureDetector(
       onSecondaryTap: onTap,
-      onLongPress: onTap,
-
+      onLongPress: () {
+        di<EditRoomManager>().toggleOrSetShowMarkRooms();
+        di<EditRoomManager>().toggleMarkedRoom(widget.room);
+      },
       child: MenuAnchor(
         controller: _controller,
         alignmentOffset: const Offset(100, -10),
@@ -78,8 +80,8 @@ class _ChatMasterTileMenuState extends State<ChatMasterTileMenu> {
                     ),
                     onConfirm: () {
                       di<ChatManager>().setSelectedRoom(null);
-                      di<EditRoomManager>().globalLeaveRoomCommand.run(
-                        widget.room,
+                      di<EditRoomManager>().globalLeaveOrForgetRoomsCommand.run(
+                        (rooms: [widget.room], action: LeaveOrForget.leave),
                       );
                     },
                   ),

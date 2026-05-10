@@ -15,6 +15,7 @@ import '../../l10n/l10n.dart';
 import 'chat_master_detail_page.dart';
 import 'chat_master_tile_menu.dart';
 import 'chat_room_master_tile_avatar.dart';
+import 'chat_room_master_tile_mark_room_check_box.dart';
 import 'chat_room_master_tile_subtitle.dart';
 
 class ChatRoomMasterTile extends StatelessWidget with WatchItMixin {
@@ -38,6 +39,10 @@ class ChatRoomMasterTile extends StatelessWidget with WatchItMixin {
 
     final syncing = watchValue(
       (EditRoomManager m) => m.oneShotSyncCommand.isRunning,
+    );
+
+    final showRoomMarkers = watchValue(
+      (EditRoomManager m) => m.showRoomMarkers,
     );
 
     final isProcessing = isLeaving || isForgetting || syncing;
@@ -65,6 +70,8 @@ class ChatRoomMasterTile extends StatelessWidget with WatchItMixin {
                           ),
                         ),
                       )
+                    : showRoomMarkers
+                    ? ChatRoomMasterTileMarkRoomCheckBox(room: room)
                     : ChatRoomMasterTileAvatar(room: room),
                 title: Text(
                   room.membership == Membership.invite
@@ -77,6 +84,10 @@ class ChatRoomMasterTile extends StatelessWidget with WatchItMixin {
                     : ChatRoomMasterTileSubTitle(room: room),
                 onTap: isProcessing
                     ? null
+                    : showRoomMarkers
+                    ? () {
+                        di<EditRoomManager>().toggleMarkedRoom(room);
+                      }
                     : () async {
                         di<DraftManager>().setAttaching(false);
                         masterScaffoldKey.currentState?.hideDrawer();

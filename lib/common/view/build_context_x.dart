@@ -15,4 +15,28 @@ extension BuildContextX on BuildContext {
     Widget Function(BuildContext) builder,
   ) => navigator.teleport(builder);
   void pop<T extends Object?>([T? result]) => navigator.pop(result);
+  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> toast(
+    Widget content, {
+    Duration duration = const Duration(seconds: 2),
+    SnackBarAction? action,
+    bool clear = true,
+    bool showCloseIcon = false,
+    double? actionOverflowThreshold,
+  }) {
+    final messenger = ScaffoldMessenger.of(this);
+    if (clear) {
+      messenger.clearSnackBars();
+    }
+    return messenger.showSnackBar(
+      SnackBar(
+        content: content,
+        duration: duration,
+        action: action,
+        showCloseIcon: showCloseIcon,
+        actionOverflowThreshold: actionOverflowThreshold ?? 0.65,
+      ),
+    );
+  }
+
+  void clearToasts() => ScaffoldMessenger.of(this).clearSnackBars();
 }
